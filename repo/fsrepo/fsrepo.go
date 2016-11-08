@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -18,6 +19,7 @@ import (
 	mfsr "github.com/ipfs/go-ipfs/repo/fsrepo/migrations"
 	serialize "github.com/ipfs/go-ipfs/repo/fsrepo/serialize"
 	dir "github.com/ipfs/go-ipfs/thirdparty/dir"
+
 	logging "gx/ipfs/QmSpJByNKFX1sCsHBEp3R73FL4NF6FnQTEGyNAXHm2GS52/go-log"
 	util "gx/ipfs/Qmb912gdngC1UWwTkhuW8knyRbcWeu5kqkxBpveLmW8bSr/go-ipfs-util"
 	"gx/ipfs/QmeqtHtxGfcsfXiou7wqHJARWPKUTUcPdtSfSYYHp48dtQ/go-ds-measure"
@@ -59,6 +61,7 @@ func (err NoRepoError) Error() string {
 }
 
 const apiFile = "api"
+const swarmKeyFile = "swarm.key"
 
 var (
 
@@ -576,6 +579,26 @@ func (r *FSRepo) GetStorageUsage() (uint64, error) {
 		return nil
 	})
 	return du, err
+}
+
+func (r *FSRepo) SwarmKey() ([]byte, error) {
+	repoPath := filepath.Clean(r.path)
+	spath := filepath.Join(repoPath, swarmKeyFile)
+
+	f, err := os.Open(spath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		} else {
+			return nil, err
+		}
+	}
+	defer f.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	return ioutil.ReadAll(f)
 }
 
 var _ io.Closer = &FSRepo{}

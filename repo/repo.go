@@ -5,6 +5,7 @@ import (
 	"io"
 
 	config "github.com/ipfs/go-ipfs/repo/config"
+
 	ds "gx/ipfs/QmbzuUusHqaLLoNTDEVLcSF6vZDHZDLPC7p4bztRvvkXxU/go-datastore"
 )
 
@@ -24,6 +25,8 @@ type Repo interface {
 
 	// SetAPIAddr sets the API address in the repo.
 	SetAPIAddr(addr string) error
+
+	SwarmKey() ([]byte, error)
 
 	io.Closer
 }
