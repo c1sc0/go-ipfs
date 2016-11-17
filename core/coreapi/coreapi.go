@@ -8,6 +8,7 @@ import (
 	path "github.com/ipfs/go-ipfs/path"
 
 	ipld "gx/ipfs/QmUsVJ7AEnGyjX8YWnrwq9vmECVGwBQNAKPpgz5KSg8dcq/go-ipld-node"
+	cid "gx/ipfs/QmcEcrBAMrwMyhSjXt4yfyPpzgSuV8HLHavnfmiKCSRqZU/go-cid"
 )
 
 type CoreAPI struct {
@@ -23,13 +24,13 @@ func (api *CoreAPI) Unixfs() coreiface.UnixfsAPI {
 	return (*UnixfsAPI)(api)
 }
 
-func resolve(ctx context.Context, n *core.IpfsNode, p string) (ipld.Node, error) {
-	pp, err := path.ParsePath(p)
+func resolve(ctx context.Context, n *core.IpfsNode, ref coreiface.Ref) (ipld.Node, error) {
+	c, err := cid.Parse(ref)
 	if err != nil {
 		return nil, err
 	}
 
-	dagnode, err := core.Resolve(ctx, n.Namesys, n.Resolver, pp)
+	dagnode, err := core.Resolve(ctx, n.Namesys, n.Resolver, path.FromCid(c))
 	if err == core.ErrNoNamesys {
 		return nil, coreiface.ErrOffline
 	} else if err != nil {
